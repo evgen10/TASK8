@@ -1,0 +1,5 @@
+D:\Tasks\Code\Task8.ADO.NET\DAL\bin\Debug\DAL.dll
+D:\Tasks\Code\Task8.ADO.NET\DAL\bin\Debug\DAL.pdb
+D:\Tasks\Code\Task8.ADO.NET\DAL\obj\Debug\DAL.csprojResolveAssemblyReference.cache
+D:\Tasks\Code\Task8.ADO.NET\DAL\obj\Debug\DAL.dll
+D:\Tasks\Code\Task8.ADO.NET\DAL\obj\Debug\DAL.pdb

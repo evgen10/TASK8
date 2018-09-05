@@ -1,0 +1,13 @@
+9/5/2018 12:48:58 PM	This log contains information about the import operation of the script 'instnwnd.sql' into project 'Northwind' on computer 'EPKZKARW0292' by user'Evgeniy_Chernyshkov.
+9/5/2018 12:48:58 PM	Started importing file: D:\Tasks\08. ADO.Net\Task\instnwnd.sql 
+9/5/2018 12:48:58 PM	File name D:\Tasks\08. ADO.Net\Task\instnwnd.sql (size: 2115020)
+9/5/2018 12:48:58 PM	Parsing import script
+9/5/2018 12:48:59 PM	Total number of batches in script: 397
+9/5/2018 12:48:59 PM	Total number of statements in script: 72
+9/5/2018 12:48:59 PM	The script was successfully imported into the project.
+9/5/2018 12:48:59 PM	Analyzing schema objects...
+9/5/2018 12:48:59 PM	Scanning project for duplicate elements
+9/5/2018 12:48:59 PM	Finished duplicate element processing
+9/5/2018 12:48:59 PM	In the script that you provided to the import operation, one or more statements were not fully understood. These statements were moved to the ScriptsIgnoredOnImport.sql file. Review the file contents for additional information.
+9/5/2018 12:48:59 PM	A summary of the import was saved to the following location: D:\Tasks\Code\Task8.ADO.NET\Northwind\Import Script Logs\instnwnd_sql_20180905064858.log
+9/5/2018 12:48:59 PM	Click Finish to continue...

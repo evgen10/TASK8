@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAL", "DAL\DAL.csproj", "{A4098CD5-92D0-4145-9C38-3672B79A79FE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DALTests", "DALTests\DALTests.csproj", "{84701944-81DE-45E2-A210-0C294829B994}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Northwind", "Northwind\Northwind.sqlproj", "{0EECB34E-F067-466B-96BD-0F47D7DB2A55}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A4098CD5-92D0-4145-9C38-3672B79A79FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4098CD5-92D0-4145-9C38-3672B79A79FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4098CD5-92D0-4145-9C38-3672B79A79FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4098CD5-92D0-4145-9C38-3672B79A79FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84701944-81DE-45E2-A210-0C294829B994}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84701944-81DE-45E2-A210-0C294829B994}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84701944-81DE-45E2-A210-0C294829B994}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84701944-81DE-45E2-A210-0C294829B994}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EECB34E-F067-466B-96BD-0F47D7DB2A55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EECB34E-F067-466B-96BD-0F47D7DB2A55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EECB34E-F067-466B-96BD-0F47D7DB2A55}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{0EECB34E-F067-466B-96BD-0F47D7DB2A55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EECB34E-F067-466B-96BD-0F47D7DB2A55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EECB34E-F067-466B-96BD-0F47D7DB2A55}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

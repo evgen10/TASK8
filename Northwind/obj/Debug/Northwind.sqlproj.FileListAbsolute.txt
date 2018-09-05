@@ -1,0 +1,5 @@
+D:\Tasks\Code\Task8.ADO.NET\Northwind\bin\Debug\Northwind.dacpac
+D:\Tasks\Code\Task8.ADO.NET\Northwind\bin\Debug\Northwind.dll
+D:\Tasks\Code\Task8.ADO.NET\Northwind\bin\Debug\Northwind.pdb
+D:\Tasks\Code\Task8.ADO.NET\Northwind\obj\Debug\Northwind.dll
+D:\Tasks\Code\Task8.ADO.NET\Northwind\obj\Debug\Northwind.pdb
