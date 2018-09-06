@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DAL.Entities
 {
-    public class OrderDetail: IEntity
+    public class OrderDetail: BaseEntity
     {
         public int OrderID { get; set; }
         public int ProductID { get; set; }

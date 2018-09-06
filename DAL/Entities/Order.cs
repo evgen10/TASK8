@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DAL.Entities
 {
-    public class Order : IEntity
+    public class Order : BaseEntity
     {
     
         [NotColumn]
@@ -19,8 +19,9 @@ namespace DAL.Entities
             this.OrderStatus = SetStatus();
         }
 
-
+        [Key]
         public int OrderID { get; set; }
+
         public string CustomerID { get; set; }
         public int? EmployeeID { get; set; }
 

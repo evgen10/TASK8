@@ -1,0 +1,1 @@
+﻿Insert into Orders (CustomerID,EmployeeID,OrderDate,RequiredDate) values('BOLID','4','9/6/2018 5:14:30 PM','9/6/2018 5:14:30 PM')

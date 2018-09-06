@@ -10,6 +10,9 @@ namespace DALTests
     [TestClass]
     public class DALTests
     {
+        private string connectionString = @"Data Source = (localdb)\ProjectsV13; Initial Catalog = Northwind_1; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = True; ApplicationIntent = ReadWrite; MultiSubnetFailover = False";
+        private string providerName = "System.Data.SqlClient";
+        
         [TestMethod]
         public void OrderStatusShouldBeNew()
         {
@@ -37,8 +40,7 @@ namespace DALTests
 
 
         }
-
-
+        
         [TestMethod]
         public void OrderStatusShouldBeComplited()
         {
@@ -53,18 +55,63 @@ namespace DALTests
 
 
         }
-
-
-
+        
         [TestMethod]
         public void GetAllOrdersTest()
-        {          
-
-            string connectionString = @"Data Source = (localdb)\ProjectsV13; Initial Catalog = Northwind_1; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = True; ApplicationIntent = ReadWrite; MultiSubnetFailover = False";
-
-            OrderRepository or = new OrderRepository(connectionString, "System.Data.SqlClient");
-
+        {
+            OrderRepository or = new OrderRepository(connectionString, providerName);
             IEnumerable<Order> orders = or.GetAll();
+        }
+
+        [TestMethod]
+        public void GetAllProductTest()
+        {
+        
+            ProductRepository or = new ProductRepository(connectionString, providerName);
+
+            IEnumerable<Product> orders = or.GetAll();
+
+        }
+        
+        [TestMethod]
+        public void CreateOrder()
+        {
+            Order order = new Order
+            {               
+                CustomerID = "CACTU",
+                EmployeeID = 4,
+                OrderDate = DateTime.Now,
+                RequiredDate = DateTime.Now,
+                ShipCountry = "RK"
+
+            };
+
+            OrderRepository or = new OrderRepository(connectionString, providerName);
+
+            or.Create(order);
+
+        }
+
+        [TestMethod]
+        public void CreateProduct()
+        {
+            Product product = new Product()
+            {
+                ProductName = "Phone",
+                SupplierID = 4,
+                CategoryID = 4,
+                QuantityPerUnit = "10 boxes x 20 bags",
+                UnitPrice = (decimal)4584.4,
+                UnitsInStock = 10,
+                Discontinued = true
+            };
+
+
+            ProductRepository pr = new ProductRepository(connectionString, providerName);
+            pr.Create(product);
+
+
+
 
         }
     }

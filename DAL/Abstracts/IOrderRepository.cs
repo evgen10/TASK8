@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 
 namespace DAL.Abstracts
 {
-    interface IOrderRepository
+    public interface IOrderRepository: IRepository<Order>
     {
-        IEnumerable<Order> GetAll();
-
-
+       
 
     }
 }
