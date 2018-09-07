@@ -9,7 +9,8 @@ namespace DAL.Abstracts
 {
     public interface IOrderRepository: IRepository<Order>
     {
-       
+        OrderNomenclature GetOrderNomenclature(int orderId);
+           
 
     }
 }

@@ -114,5 +114,57 @@ namespace DALTests
 
 
         }
+        
+
+        [TestMethod]
+        public void DeleteEmployeeTerritories()
+        {
+
+            EmployeeTerritories empTer = new EmployeeTerritories()
+            {
+                EmployeeID = 1,
+                TerritoryID = "06897"
+            };
+
+
+            EmployeeTerritoriesRepository r = new EmployeeTerritoriesRepository(connectionString, providerName);
+            r.Delete(empTer);
+
+        }
+
+        [TestMethod]
+        public void DeleteOrder()
+        {
+            Order order = new Order
+            {
+                OrderID = 12079,
+                CustomerID = "HUNGO",
+                EmployeeID = 3,
+                OrderDate = DateTime.Now,
+                RequiredDate = DateTime.Now,
+                ShippedDate = DateTime.Now,
+                ShipCountry = "RK"
+
+            };
+
+            OrderRepository or = new OrderRepository(connectionString, providerName);
+
+            or.Delete(order);
+
+
+
+        }
+
+        [TestMethod]
+        public void GetOrderNomenclature()
+        {
+            OrderNomenclature orderNom;
+
+            OrderRepository or = new OrderRepository(connectionString,providerName);
+
+            orderNom = or.GetOrderNomenclature(5522200);
+
+
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DAL.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ namespace DAL.Entities
 {
     public class Category : BaseEntity
     {
+        [Key]
         public int CategoryID { get; set; }
         public string CategoryName { get; set; }
         public string Description { get; set; }

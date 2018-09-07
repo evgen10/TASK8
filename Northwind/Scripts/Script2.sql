@@ -1,0 +1,1 @@
+﻿DELETE Orders WHERE OrderID = '11088' 

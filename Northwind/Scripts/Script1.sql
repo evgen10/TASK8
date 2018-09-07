@@ -1,1 +1,5 @@
-﻿Insert into Orders (CustomerID,EmployeeID,OrderDate,RequiredDate) values('BOLID','4','9/6/2018 5:14:30 PM','9/6/2018 5:14:30 PM')
+﻿select o.*,od.ProductID,p.ProductName, od.UnitPrice,od.Quantity,od.Discount
+from dbo.Orders o
+join dbo.[Order Details] od on o.OrderID = od.OrderID
+join dbo.Products p on p.ProductID = od.ProductID
+where o.OrderID = 10261

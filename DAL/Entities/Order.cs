@@ -10,23 +10,25 @@ namespace DAL.Entities
 {
     public class Order : BaseEntity
     {
-    
-        [NotColumn]
-        public OrderStatuses OrderStatus { get;set; }
+        protected DateTime? shippedDate;
+        protected DateTime? orderDate;
 
         public Order()
         {
             this.OrderStatus = SetStatus();
         }
 
+        [NotColumn]
+        public OrderStatuses OrderStatus { get; set; }
+
         [Key]
         public int OrderID { get; set; }
 
         public string CustomerID { get; set; }
-        public int? EmployeeID { get; set; }
 
+        public int? EmployeeID { get; set; }       
 
-        private DateTime? orderDate;
+        [Unchangeable]
         public DateTime? OrderDate
         {
             get { return orderDate; }
@@ -37,10 +39,9 @@ namespace DAL.Entities
             }
         }
 
+        public DateTime? RequiredDate { get; set; }   
 
-        public DateTime? RequiredDate { get; set; }
-
-        private DateTime? shippedDate;
+        [Unchangeable]
         public DateTime? ShippedDate
         {
             get { return shippedDate; }
@@ -51,21 +52,23 @@ namespace DAL.Entities
             }
         }
 
-
-
-
         public int? ShipVia { get; set; }
+
         public decimal? Freight { get; set; }
+
         public string ShipName { get; set; }
+
         public string ShipAddress { get; set; }
+
         public string ShipCity { get; set; }
+
         public string ShipRegion { get; set; }
+
         public string ShipPostalCode { get; set; }
+
         public string ShipCountry { get; set; }
-
-
-
-        private OrderStatuses SetStatus()
+                
+        protected OrderStatuses SetStatus()
         {
             if (this.OrderDate == null)
             {

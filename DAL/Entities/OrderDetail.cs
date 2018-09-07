@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DAL.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,9 @@ namespace DAL.Entities
 {
     public class OrderDetail: BaseEntity
     {
+        [Key]
         public int OrderID { get; set; }
+        [Key]
         public int ProductID { get; set; }
         public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
