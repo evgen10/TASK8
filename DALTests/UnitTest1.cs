@@ -4,6 +4,7 @@ using DAL.Entities;
 using DAL.Repositories;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using DAL;
 
 namespace DALTests
 {
@@ -59,17 +60,16 @@ namespace DALTests
         [TestMethod]
         public void GetAllOrdersTest()
         {
-            OrderRepository or = new OrderRepository(connectionString, providerName);
-            IEnumerable<Order> orders = or.GetAll();
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+            IEnumerable<Order> orders = uw.Orders.GetAll();
         }
 
         [TestMethod]
         public void GetAllProductTest()
         {
-        
-            ProductRepository or = new ProductRepository(connectionString, providerName);
 
-            IEnumerable<Product> orders = or.GetAll();
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+            IEnumerable<Product> products = uw.Products.GetAll();
 
         }
         
@@ -86,9 +86,9 @@ namespace DALTests
 
             };
 
-            OrderRepository or = new OrderRepository(connectionString, providerName);
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
 
-            or.Create(order);
+            uw.Orders.Create(order);
 
         }
 
@@ -107,15 +107,14 @@ namespace DALTests
             };
 
 
-            ProductRepository pr = new ProductRepository(connectionString, providerName);
-            pr.Create(product);
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+            uw.Products.Create(product);
 
 
 
 
         }
         
-
         [TestMethod]
         public void DeleteEmployeeTerritories()
         {
@@ -127,8 +126,8 @@ namespace DALTests
             };
 
 
-            EmployeeTerritoriesRepository r = new EmployeeTerritoriesRepository(connectionString, providerName);
-            r.Delete(empTer);
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+            uw.EmployeeTerritories.Delete(empTer);
 
         }
 
@@ -147,9 +146,9 @@ namespace DALTests
 
             };
 
-            OrderRepository or = new OrderRepository(connectionString, providerName);
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
 
-            or.Delete(order);
+            uw.Orders.Delete(order);
 
 
 
@@ -160,11 +159,56 @@ namespace DALTests
         {
             OrderNomenclature orderNom;
 
-            OrderRepository or = new OrderRepository(connectionString,providerName);
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
 
-            orderNom = or.GetOrderNomenclature(5522200);
+            orderNom = uw.Orders.GetOrderNomenclature(5522200);
 
 
         }
+
+        [TestMethod]
+        public void FindTest()
+        {
+            Order o = new Order()
+            {
+                OrderID = 102411
+            };
+
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+
+            var order = uw.Orders.Find(o);
+
+
+        }
+
+        [TestMethod]
+        public void UpdateOrder()
+        {
+            Order order = new Order
+            {
+                OrderID = 10248,
+                CustomerID = "HUNGO",
+                EmployeeID = 6,
+                OrderDate = DateTime.Now,
+                RequiredDate = DateTime.Now,
+                ShippedDate = DateTime.Now,
+                Freight = null,
+                ShipName = "LaLala",
+                ShipPostalCode = null,
+                ShipCountry = "RKY",
+                ShipRegion = "RJ",
+                ShipVia = 3
+                
+                
+            };
+
+
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+
+            uw.Orders.Update(order);
+
+        }
+
+
     }
 }

@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstracts\IUnitOfWork.cs" />
     <Compile Include="Abstracts\IEmployeeTerritoriesRepository.cs" />
     <Compile Include="Abstracts\IOrderRepository.cs" />
     <Compile Include="Abstracts\IProductRepository.cs" />
@@ -48,6 +49,7 @@
     <Compile Include="Attributes\KeyAttribute.cs" />
     <Compile Include="Attributes\NotColumn.cs" />
     <Compile Include="Attributes\UnchangeableAttribute.cs" />
+    <Compile Include="UnitOfWork.cs" />
     <Compile Include="Entities\Category.cs" />
     <Compile Include="Entities\BaseEntity.cs" />
     <Compile Include="Entities\EmployeeTerritories.cs" />

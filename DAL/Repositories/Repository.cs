@@ -18,72 +18,90 @@ namespace DAL.Repositories
     {
         protected readonly DbProviderFactory providerFactory;
         protected readonly string connectionString;
+        protected readonly IDbConnection connection;
 
-        public Repository(string connectionString, string providerName)
+        public Repository(IDbConnection connection)
         {
-            providerFactory = DbProviderFactories.GetFactory(providerName);
-            this.connectionString = connectionString;
+            this.connection = connection;
         }
 
         public virtual void Create(TEntity entity)
         {
-            using (IDbConnection connection = providerFactory.CreateConnection())
-            {
-                connection.ConnectionString = connectionString;
-                connection.Open();
+            IDbCommand command = connection.CreateCommand();
+            command.CommandText = GetInsertQuery(typeof(TEntity).Name, entity);
+            command.CommandType = CommandType.Text;
 
-                IDbCommand command = connection.CreateCommand();
-                command.CommandText = GetInsertQuery(typeof(TEntity).Name, entity);
-                command.CommandType = CommandType.Text;
-
-                command.ExecuteNonQuery();
-
-
-            }
+            command.ExecuteNonQuery();
         }
 
         public virtual void Delete(TEntity entity)
         {
-            using (IDbConnection connection = providerFactory.CreateConnection())
+            IDbCommand command = connection.CreateCommand();
+
+            if (Find(entity) != null)
             {
-                connection.ConnectionString = connectionString;
-                connection.Open();
-
-                IDbCommand command = connection.CreateCommand();
-
                 command.CommandText = GetDeleteQuery(typeof(TEntity).Name, entity);
                 command.CommandType = CommandType.Text;
 
                 command.ExecuteNonQuery();
             }
+            else
+            {
+                throw new Exception("No entry found");
+            }
+
+
         }
 
         public virtual IEnumerable<TEntity> GetAll()
         {
 
-            using (IDbConnection connection = providerFactory.CreateConnection())
-            {
-                connection.ConnectionString = connectionString;
-                connection.Open();
+            IDbCommand command = connection.CreateCommand();
+            command.CommandText = GetAllOrderQuery(typeof(TEntity).Name);
+            command.CommandType = CommandType.Text;
 
-                IDbCommand command = connection.CreateCommand();
-                command.CommandText = GetAllOrderQuery(typeof(TEntity).Name);
-                command.CommandType = CommandType.Text;
+            return Mapper<TEntity>(command);
 
-                return Mapper<TEntity>(command);
-            }
 
         }
+
+
 
         public virtual void Update(TEntity entity)
         {
-            throw new NotImplementedException();
+            IDbCommand command = connection.CreateCommand();
+
+            TEntity sourceEntity = Find(entity);
+
+            if (sourceEntity != null)
+            {
+                command.CommandText = GetUpdateQuery(typeof(TEntity).Name, sourceEntity, entity);
+                command.CommandType = CommandType.Text;
+
+                command.ExecuteNonQuery();
+            }
+            else
+            {
+                throw new Exception("No entry found");
+            }
         }
 
-        //public virtual TEntity Find(object id)
-        //{
+        public virtual TEntity Find(TEntity entity)
+        {
+            try
+            {
+                IDbCommand command = connection.CreateCommand();
 
-        //}
+                command.CommandText = GetFindQuery(typeof(TEntity).Name, entity);
+                command.CommandType = CommandType.Text;
+                return Mapper<TEntity>(command).First();
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
+
+        }
 
         protected IEnumerable<T> Mapper<T>(IDbCommand command) where T : new()
         {
@@ -115,6 +133,9 @@ namespace DAL.Repositories
                     list.Add(entity);
                 }
 
+
+
+
                 return list;
             }
         }
@@ -131,7 +152,7 @@ namespace DAL.Repositories
             StringBuilder columns = new StringBuilder();
             StringBuilder values = new StringBuilder();
 
-            foreach (PropertyInfo item in GetDateForInsert(entity))
+            foreach (PropertyInfo item in GetDateForInsertUpdate(entity))
             {
                 columns.Append(item.Name);
                 columns.Append(",");
@@ -153,42 +174,110 @@ namespace DAL.Repositories
 
         private string GetDeleteQuery(string tableName, TEntity entity)
         {
-            StringBuilder idColumns = new StringBuilder();
 
             tableName = GetPluralize(tableName);
 
+            StringBuilder idColumns = GetCondition(entity);
+
+            return $"delete from {tableName} where {idColumns}";
+
+
+        }
+
+        private string GetFindQuery(string tableName, TEntity entity)
+        {
+            StringBuilder condition = GetCondition(entity);
+
+            tableName = GetPluralize(tableName);
+
+            return $"select * from {tableName} where {condition}";
+        }
+
+        private string GetUpdateQuery(string tableName, TEntity sourceEntity , TEntity changeableEntity)
+        {
+            StringBuilder settings  = GetUpdateSetting(sourceEntity, changeableEntity);
+            StringBuilder condition = GetCondition(changeableEntity);
+
+            tableName = GetPluralize(tableName);           
+            string q = $"update {tableName} set {settings} where {condition}";
+
+            return q;
+        }
+
+
+        ///доделать()
+        private StringBuilder GetUpdateSetting(TEntity sourceEntity, TEntity changeableEntity)
+        {
+            Type type = sourceEntity.GetType();
+
+            List<PropertyInfo> properties = type.GetProperties().Where(p => !p.IsDefined(typeof(KeyAttribute)) && !p.IsDefined(typeof(NotColumnAttribute))).ToList();
+
+            StringBuilder settings = new StringBuilder();
+
+            foreach (var property in properties)
+            {
+                if (!property.GetValue(sourceEntity).Equals(property.GetValue(changeableEntity)))
+                {
+                    settings.AppendLine($"{property.Name} = '{property.GetValue(changeableEntity)}'");
+                    settings.Append(",");
+                }
+
+            }
+
+            settings.Length--;
+
+            //List<PropertyInfo> properties = GetDateForInsertUpdate(entity);
+
+            //if (properties.Count != 0)
+            //{
+            //    foreach (var property in properties)
+            //    {
+            //        settings.AppendLine($"{property.Name} = '{property.GetValue(entity)}'");
+            //        settings.Append(",");
+            //    }
+
+            //    settings.Length--;
+            //}
+
+
+
+            return settings;
+
+        }
+
+        private StringBuilder GetCondition(TEntity entity)
+        {
             Type type = entity.GetType();
             List<PropertyInfo> properties = type.GetProperties().Where(p => p.IsDefined(typeof(KeyAttribute))).ToList();
 
+            StringBuilder idColumns = new StringBuilder();
+
             if (properties.Count != 0)
             {
-                if (properties.Count>1)
+                if (properties.Count > 1)
                 {
                     string andStr = " AND ";
 
                     foreach (var property in properties)
                     {
                         idColumns.Append($"{property.Name}='{property.GetValue(entity)}'");
-                        idColumns.Append(andStr);                   
-                        
+                        idColumns.Append(andStr);
                     }
 
-                    idColumns.Length -=andStr.Length;
+                    idColumns.Length -= andStr.Length;
                 }
                 else
                 {
                     idColumns.Append($"{properties.First().Name}='{properties.First().GetValue(entity)}'");
-                }             
-                
+                }
+
             }
             else
             {
-                throw new Exception($"There is no key to delete in entity {type.Name}");
+                throw new Exception($"There is no  a key property in entity {type.Name}");
             }
 
-            return $"delete from {tableName} where {idColumns}";
-
-
+            return idColumns;
         }
 
         private string GetPluralize(string word)
@@ -198,11 +287,12 @@ namespace DAL.Repositories
 
             return word;
         }
-        
-        private List<PropertyInfo> GetDateForInsert(TEntity entity)
+
+        private List<PropertyInfo> GetDateForInsertUpdate(TEntity entity)
         {
 
             Type type = entity.GetType();
+
             List<PropertyInfo> properties = type.GetProperties().Where(p => !p.IsDefined(typeof(NotColumnAttribute)) &&
                                                              !p.IsDefined(typeof(KeyAttribute)) &&
                                                               p.GetValue(entity) != null).ToList();
@@ -210,8 +300,6 @@ namespace DAL.Repositories
             return properties;
 
         }
-        
-     
 
     }
 }

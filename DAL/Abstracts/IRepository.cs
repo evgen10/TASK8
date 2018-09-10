@@ -13,5 +13,6 @@ namespace DAL.Abstracts
         void Create(T entity);
         void Delete(T entity);
         void Update(T entity);
+        T Find(T entity);
     }
 }
