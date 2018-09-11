@@ -64,9 +64,7 @@ namespace DAL.Repositories
 
 
         }
-
-
-
+        
         public virtual void Update(TEntity entity)
         {
             IDbCommand command = connection.CreateCommand();
@@ -133,9 +131,6 @@ namespace DAL.Repositories
                     list.Add(entity);
                 }
 
-
-
-
                 return list;
             }
         }
@@ -198,49 +193,41 @@ namespace DAL.Repositories
             StringBuilder settings  = GetUpdateSetting(sourceEntity, changeableEntity);
             StringBuilder condition = GetCondition(changeableEntity);
 
-            tableName = GetPluralize(tableName);           
-            string q = $"update {tableName} set {settings} where {condition}";
+            tableName = GetPluralize(tableName);      
+       
 
-            return q;
+            return $"update {tableName} set {settings} where {condition}";
         }
 
-
-        ///доделать()
         private StringBuilder GetUpdateSetting(TEntity sourceEntity, TEntity changeableEntity)
         {
             Type type = sourceEntity.GetType();
 
             List<PropertyInfo> properties = type.GetProperties().Where(p => !p.IsDefined(typeof(KeyAttribute)) && !p.IsDefined(typeof(NotColumnAttribute))).ToList();
 
-            StringBuilder settings = new StringBuilder();
+            StringBuilder settings = new StringBuilder();          
 
             foreach (var property in properties)
             {
-                if (!property.GetValue(sourceEntity).Equals(property.GetValue(changeableEntity)))
+               
+                if (!Equals(property.GetValue(sourceEntity), property.GetValue(changeableEntity)))
                 {
-                    settings.AppendLine($"{property.Name} = '{property.GetValue(changeableEntity)}'");
+                    if (property.GetValue(changeableEntity) == null)
+                    {
+                        settings.AppendLine($"{property.Name} = null ");
+                    }
+                    else
+                    {
+                        settings.AppendLine($"{property.Name} = '{property.GetValue(changeableEntity)}'");
+                    }
+                    
                     settings.Append(",");
                 }
 
             }
 
-            settings.Length--;
-
-            //List<PropertyInfo> properties = GetDateForInsertUpdate(entity);
-
-            //if (properties.Count != 0)
-            //{
-            //    foreach (var property in properties)
-            //    {
-            //        settings.AppendLine($"{property.Name} = '{property.GetValue(entity)}'");
-            //        settings.Append(",");
-            //    }
-
-            //    settings.Length--;
-            //}
-
-
-
+            settings.Length--; 
+            
             return settings;
 
         }

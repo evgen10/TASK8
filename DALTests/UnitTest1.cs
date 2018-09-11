@@ -4,6 +4,7 @@ using DAL.Entities;
 using DAL.Repositories;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using System.Linq;
 using DAL;
 
 namespace DALTests
@@ -181,19 +182,45 @@ namespace DALTests
 
         }
 
+
+        [TestMethod]
+        public void UpdateProduct()
+        {
+            Product product = new Product()
+            {
+                ProductID = 1,
+                ProductName = "Phone",
+                SupplierID = 1,
+                CategoryID =1,
+                QuantityPerUnit = null,
+                UnitPrice = 14,
+                UnitsInStock = 5,
+                UnitsOnOrder = 8,
+                ReorderLevel = null,
+                Discontinued = true
+
+            };
+
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+
+            uw.Products.Update(product);
+
+
+        }
+
         [TestMethod]
         public void UpdateOrder()
         {
             Order order = new Order
             {
-                OrderID = 10248,
+                OrderID = 11078,
                 CustomerID = "HUNGO",
                 EmployeeID = 6,
-                OrderDate = DateTime.Now,
+               // OrderDate = DateTime.Now,
                 RequiredDate = DateTime.Now,
-                ShippedDate = DateTime.Now,
+               // ShippedDate = DateTime.Now,
                 Freight = null,
-                ShipName = "LaLala",
+                ShipName = null,
                 ShipPostalCode = null,
                 ShipCountry = "RKY",
                 ShipRegion = "RJ",
@@ -209,6 +236,40 @@ namespace DALTests
 
         }
 
+        [TestMethod]
+        public void SetOrderAsUnderway()
+        {
+            Order order = new Order
+            {
+                OrderID = 11078           
+
+            };
+
+
+            UnitOfWork uw = new UnitOfWork(connectionString,providerName);
+
+            uw.Orders.SetOrderAsUnderway(order, DateTime.Now);
+
+
+        }
+
+
+        [TestMethod]
+        public void SetOrderAsCompleted()
+        {
+            Order order = new Order
+            {
+                OrderID = 11078
+
+            };
+
+
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+
+            uw.Orders.SetOrderAsCompleted(order, DateTime.Now);
+
+
+        }
 
     }
 }

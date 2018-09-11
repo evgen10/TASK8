@@ -10,7 +10,12 @@ namespace DAL.Abstracts
     public interface IOrderRepository: IRepository<Order>
     {
         OrderNomenclature GetOrderNomenclature(int orderId);
-           
+        void SetOrderAsUnderway(Order order, DateTime orderDate);
+        void SetOrderAsCompleted(Order order, DateTime shippedDate);
+
+        //object GetCustomerOrderHistory(string customerId);
+       
+
 
     }
 }

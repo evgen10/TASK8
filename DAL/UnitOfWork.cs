@@ -13,8 +13,7 @@ namespace DAL
     public class UnitOfWork: IDisposable, IUnitOfWork
     {
         private readonly IDbConnection connection;
-        private readonly DbProviderFactory providerFactory;
-    
+        private readonly DbProviderFactory providerFactory;    
 
         public IOrderRepository Orders { get; private set; }
         public IProductRepository Products { get; private set; }
@@ -33,9 +32,7 @@ namespace DAL
             Products = new ProductRepository(connection);
             EmployeeTerritories = new EmployeeTerritoriesRepository(connection);
         }
-
-
-
+        
         public void Dispose()
         {
             connection.Close();

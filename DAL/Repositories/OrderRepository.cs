@@ -9,6 +9,7 @@ using System.Data.Common;
 using System.Data;
 using System.Reflection;
 using DAL.Attributes;
+using System.Data.SqlClient;
 
 namespace DAL.Repositories
 {
@@ -31,37 +32,81 @@ namespace DAL.Repositories
             }
         }
 
-        //public override void Update(Order order)
+        public override void Update(Order order)
+        {
+            Order sourceOrder = Find(order);
+
+
+            if (sourceOrder.OrderStatus == OrderStatuses.Underway || sourceOrder.OrderStatus == OrderStatuses.Completed)
+            {
+                throw new Exception("Order status prohibits changes");
+            }
+
+
+
+            Type type = order.GetType();
+            IEnumerable<PropertyInfo> unchangeableProperties = type.GetProperties().Where(p => p.IsDefined(typeof(UnchangeableAttribute)));
+
+            if (sourceOrder != null)
+            {
+                foreach (var property in unchangeableProperties)
+                {
+                    if (!Equals(property.GetValue(sourceOrder), property.GetValue(order)))
+                    {
+                        throw new Exception($"Can not change the value of property {property.Name}");
+                    }
+                }
+
+                base.Update(order);
+
+            }
+            else
+            {
+                throw new Exception("No entry found");
+            }
+
+
+
+
+        }
+
+        public void SetOrderAsUnderway(Order order, DateTime orderDate)
+        {
+            Order sourceOrder = Find(order);
+
+            if (sourceOrder != null)
+            {
+                sourceOrder.OrderDate = orderDate;
+                base.Update(sourceOrder);
+            }
+            else
+            {
+                throw new Exception("No entry found");
+            }
+
+        }
+
+        public void SetOrderAsCompleted(Order order, DateTime shippedDate)
+        {
+            Order sourceOrder = Find(order);
+
+            if (sourceOrder != null)
+            {
+                sourceOrder.ShippedDate = shippedDate;
+                base.Update(sourceOrder);
+            }
+            else
+            {
+                throw new Exception("No entry found");
+            }
+        }
+
+        //public object GetCustomerOrderHistory(string customerId)
         //{
+        //    IDbCommand command = connection.CreateCommand();
 
-        //    //if (order.OrderStatus == OrderStatuses.Underway || order.OrderStatus == OrderStatuses.Completed)
-        //    //{
-        //    //    throw new Exception("Order status prohibits changes");
-        //    //}
-
-        //    Type type = order.GetType();
-        //    List<PropertyInfo> unchangeableProperty = type.GetProperties().Where(p => p.IsDefined(typeof(UnchangeableAttribute))).ToList();
-
-
-        //    Order ord = Find(order);
-
-        //    if (ord != null)
-        //    {
-
-                
-                
-                   
-                
-
-
-
-
-        //    }
-        //    else
-        //    {
-        //        throw new Exception("No entry found");
-        //    }
-
+        //    command.CommandText = "exec CustOrderHist";
+        //    command.CommandType = CommandType.StoredProcedure;
 
 
 
@@ -71,7 +116,6 @@ namespace DAL.Repositories
 
         public OrderNomenclature GetOrderNomenclature(int orderId)
         {
-
             try
             {
 
@@ -87,7 +131,6 @@ namespace DAL.Repositories
                 return null;
             }
 
-
         }
 
         private string GetOrderNomenclaturQuery(int id)
@@ -99,6 +142,6 @@ namespace DAL.Repositories
                     $" where o.OrderID = {id}";
         }
 
-
+     
     }
 }

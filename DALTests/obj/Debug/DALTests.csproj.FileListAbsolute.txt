@@ -5,3 +5,10 @@ D:\Tasks\Code\Task8.ADO.NET\DALTests\bin\Debug\DAL.pdb
 D:\Tasks\Code\Task8.ADO.NET\DALTests\obj\Debug\DALTests.csprojResolveAssemblyReference.cache
 D:\Tasks\Code\Task8.ADO.NET\DALTests\obj\Debug\DALTests.dll
 D:\Tasks\Code\Task8.ADO.NET\DALTests\obj\Debug\DALTests.pdb
+D:\EVgen\Tasks\TASK8\DALTests\bin\Debug\DALTests.dll
+D:\EVgen\Tasks\TASK8\DALTests\bin\Debug\DALTests.pdb
+D:\EVgen\Tasks\TASK8\DALTests\bin\Debug\DAL.dll
+D:\EVgen\Tasks\TASK8\DALTests\bin\Debug\DAL.pdb
+D:\EVgen\Tasks\TASK8\DALTests\obj\Debug\DALTests.csprojResolveAssemblyReference.cache
+D:\EVgen\Tasks\TASK8\DALTests\obj\Debug\DALTests.dll
+D:\EVgen\Tasks\TASK8\DALTests\obj\Debug\DALTests.pdb
