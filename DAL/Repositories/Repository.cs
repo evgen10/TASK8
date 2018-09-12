@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity.Design.PluralizationServices;
 using System.Globalization;
+using DAL.Exceptions;
 
 namespace DAL.Repositories
 {
@@ -47,7 +48,7 @@ namespace DAL.Repositories
             }
             else
             {
-                throw new Exception("No entry found");
+                throw new EntityNotExistsException("No entry found");
             }
 
 
@@ -80,7 +81,7 @@ namespace DAL.Repositories
             }
             else
             {
-                throw new Exception("No entry found");
+                throw new EntityNotExistsException("No entry found");
             }
         }
 
@@ -261,7 +262,7 @@ namespace DAL.Repositories
             }
             else
             {
-                throw new Exception($"There is no  a key property in entity {type.Name}");
+                throw new LackKeyFieldException($"There is no  a key property in entity {type.Name}");
             }
 
             return idColumns;

@@ -49,6 +49,12 @@
     <Compile Include="Attributes\KeyAttribute.cs" />
     <Compile Include="Attributes\NotColumn.cs" />
     <Compile Include="Attributes\UnchangeableAttribute.cs" />
+    <Compile Include="Entities\CustOrderDetail.cs" />
+    <Compile Include="Entities\OrderHistory.cs" />
+    <Compile Include="Exceptions\EntityNotExistsException.cs" />
+    <Compile Include="Exceptions\LackKeyFieldException.cs" />
+    <Compile Include="Exceptions\ProhibitionDeleteException.cs" />
+    <Compile Include="Exceptions\ProhibitionUpdateException.cs" />
     <Compile Include="UnitOfWork.cs" />
     <Compile Include="Entities\Category.cs" />
     <Compile Include="Entities\BaseEntity.cs" />

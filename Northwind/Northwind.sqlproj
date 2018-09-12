@@ -106,4 +106,7 @@
     <None Include="Scripts\Script1.sql" />
     <None Include="Scripts\Script2.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Scripts\DBInit.sql" />
+  </ItemGroup>
 </Project>

@@ -10,6 +10,7 @@ using System.Data;
 using System.Reflection;
 using DAL.Attributes;
 using System.Data.SqlClient;
+using DAL.Exceptions;
 
 namespace DAL.Repositories
 {
@@ -28,7 +29,7 @@ namespace DAL.Repositories
             }
             else
             {
-                throw new Exception("Can not delete order with status \"Completed\"");
+                throw new ProhibitionDeleteException("Can not delete order with status \"Completed\"");
             }
         }
 
@@ -39,7 +40,7 @@ namespace DAL.Repositories
 
             if (sourceOrder.OrderStatus == OrderStatuses.Underway || sourceOrder.OrderStatus == OrderStatuses.Completed)
             {
-                throw new Exception("Order status prohibits changes");
+                throw new ProhibitionUpdateException("Order status prohibits changes");
             }
 
 
@@ -53,7 +54,7 @@ namespace DAL.Repositories
                 {
                     if (!Equals(property.GetValue(sourceOrder), property.GetValue(order)))
                     {
-                        throw new Exception($"Can not change the value of property {property.Name}");
+                        throw new ProhibitionUpdateException($"Can not change the value of property {property.Name}");
                     }
                 }
 
@@ -62,7 +63,7 @@ namespace DAL.Repositories
             }
             else
             {
-                throw new Exception("No entry found");
+                throw new EntityNotExistsException("No entry found");
             }
 
 
@@ -81,7 +82,7 @@ namespace DAL.Repositories
             }
             else
             {
-                throw new Exception("No entry found");
+                throw new EntityNotExistsException("No entry found");
             }
 
         }
@@ -97,22 +98,45 @@ namespace DAL.Repositories
             }
             else
             {
-                throw new Exception("No entry found");
+                throw new EntityNotExistsException("No entry found");
             }
         }
 
-        //public object GetCustomerOrderHistory(string customerId)
-        //{
-        //    IDbCommand command = connection.CreateCommand();
+        public IEnumerable<OrderHistory> GetCustOrderHistory(string customerId)
+        {
+            IDbCommand command = connection.CreateCommand();
 
-        //    command.CommandText = "exec CustOrderHist";
-        //    command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "CustOrderHist";
+            command.CommandType = CommandType.StoredProcedure;
+
+            IDbDataParameter custIdPrarm = command.CreateParameter();
+            custIdPrarm.ParameterName = "@CustomerID";
+            custIdPrarm.DbType = DbType.StringFixedLength;
+            custIdPrarm.Value = customerId;
+
+            command.Parameters.Add(custIdPrarm);
+
+            return Mapper<OrderHistory>(command);
 
 
+        }
 
+        public IEnumerable<CustOrderDetail> GetCustOrdersDetail(int orderId)
+        {
+            IDbCommand command = connection.CreateCommand();
 
+            command.CommandText = "CustOrdersDetail";
+            command.CommandType = CommandType.StoredProcedure;
 
-        //}
+            IDbDataParameter custIdPrarm = command.CreateParameter();
+            custIdPrarm.ParameterName = "@OrderID";
+            custIdPrarm.DbType = DbType.Int32;
+            custIdPrarm.Value = orderId;
+
+            command.Parameters.Add(custIdPrarm);
+
+            return Mapper<CustOrderDetail>(command);
+        }
 
         public OrderNomenclature GetOrderNomenclature(int orderId)
         {
@@ -132,7 +156,7 @@ namespace DAL.Repositories
             }
 
         }
-
+        
         private string GetOrderNomenclaturQuery(int id)
         {
             return @"select o.*,od.ProductID,p.ProductName, od.UnitPrice,od.Quantity,od.Discount
@@ -142,6 +166,6 @@ namespace DAL.Repositories
                     $" where o.OrderID = {id}";
         }
 
-     
+       
     }
 }

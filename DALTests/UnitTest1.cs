@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Collections.Generic;
 using System.Linq;
 using DAL;
-
+using DALTests.Comparators;
 namespace DALTests
 {
     [TestClass]
@@ -14,7 +14,12 @@ namespace DALTests
     {
         private string connectionString = @"Data Source = (localdb)\ProjectsV13; Initial Catalog = Northwind_1; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = True; ApplicationIntent = ReadWrite; MultiSubnetFailover = False";
         private string providerName = "System.Data.SqlClient";
-        
+
+
+
+
+
+
         [TestMethod]
         public void OrderStatusShouldBeNew()
         {
@@ -42,7 +47,7 @@ namespace DALTests
 
 
         }
-        
+
         [TestMethod]
         public void OrderStatusShouldBeComplited()
         {
@@ -57,26 +62,39 @@ namespace DALTests
 
 
         }
-        
+
         [TestMethod]
         public void GetAllOrdersTest()
         {
-            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
-            IEnumerable<Order> orders = uw.Orders.GetAll();
+            int orderCount = 830;
+
+            using (UnitOfWork uw = new UnitOfWork(connectionString, providerName))
+            {
+                IEnumerable<Order> orders = uw.Orders.GetAll();
+                Assert.AreEqual(orders.Count(), orderCount);
+            }
+
         }
 
         [TestMethod]
         public void GetAllProductTest()
         {
+            int productCount = 77;
+            using (UnitOfWork uw = new UnitOfWork(connectionString, providerName))
+            {
+                IEnumerable<Product> products = uw.Products.GetAll();
+                Assert.AreEqual(products.Count(), productCount);
+            }
 
-            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
-            IEnumerable<Product> products = uw.Products.GetAll();
+
 
         }
-        
+
         [TestMethod]
         public void CreateOrder()
         {
+
+            //записываемый в бд заказ
             Order order = new Order
             {               
                 CustomerID = "CACTU",
@@ -87,9 +105,18 @@ namespace DALTests
 
             };
 
-            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
 
-            uw.Orders.Create(order);
+            using (UnitOfWork uw = new UnitOfWork(connectionString, providerName))
+            {
+                uw.Orders.Create(order);               
+                             
+                                               
+            }
+
+            using (UnitOfWork uow = new UnitOfWork(connectionString, providerName))
+            {
+                uow.Orders.GetAll().First(x => x == order);
+            }            
 
         }
 
@@ -110,12 +137,12 @@ namespace DALTests
 
             UnitOfWork uw = new UnitOfWork(connectionString, providerName);
             uw.Products.Create(product);
-
+            uw.Dispose();
 
 
 
         }
-        
+
         [TestMethod]
         public void DeleteEmployeeTerritories()
         {
@@ -129,7 +156,7 @@ namespace DALTests
 
             UnitOfWork uw = new UnitOfWork(connectionString, providerName);
             uw.EmployeeTerritories.Delete(empTer);
-
+            uw.Dispose();
         }
 
         [TestMethod]
@@ -151,7 +178,7 @@ namespace DALTests
 
             uw.Orders.Delete(order);
 
-
+            uw.Dispose();
 
         }
 
@@ -164,7 +191,7 @@ namespace DALTests
 
             orderNom = uw.Orders.GetOrderNomenclature(5522200);
 
-
+            uw.Dispose();
         }
 
         [TestMethod]
@@ -179,6 +206,7 @@ namespace DALTests
 
             var order = uw.Orders.Find(o);
 
+            uw.Dispose();
 
         }
 
@@ -191,7 +219,7 @@ namespace DALTests
                 ProductID = 1,
                 ProductName = "Phone",
                 SupplierID = 1,
-                CategoryID =1,
+                CategoryID = 1,
                 QuantityPerUnit = null,
                 UnitPrice = 14,
                 UnitsInStock = 5,
@@ -204,7 +232,7 @@ namespace DALTests
             UnitOfWork uw = new UnitOfWork(connectionString, providerName);
 
             uw.Products.Update(product);
-
+            uw.Dispose();
 
         }
 
@@ -216,24 +244,24 @@ namespace DALTests
                 OrderID = 11078,
                 CustomerID = "HUNGO",
                 EmployeeID = 6,
-               // OrderDate = DateTime.Now,
+                // OrderDate = DateTime.Now,
                 RequiredDate = DateTime.Now,
-               // ShippedDate = DateTime.Now,
+                // ShippedDate = DateTime.Now,
                 Freight = null,
                 ShipName = null,
                 ShipPostalCode = null,
                 ShipCountry = "RKY",
                 ShipRegion = "RJ",
                 ShipVia = 3
-                
-                
+
+
             };
 
 
             UnitOfWork uw = new UnitOfWork(connectionString, providerName);
 
             uw.Orders.Update(order);
-
+            uw.Dispose();
         }
 
         [TestMethod]
@@ -241,16 +269,16 @@ namespace DALTests
         {
             Order order = new Order
             {
-                OrderID = 11078           
+                OrderID = 11078
 
             };
 
 
-            UnitOfWork uw = new UnitOfWork(connectionString,providerName);
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
 
             uw.Orders.SetOrderAsUnderway(order, DateTime.Now);
 
-
+            uw.Dispose();
         }
 
 
@@ -268,8 +296,40 @@ namespace DALTests
 
             uw.Orders.SetOrderAsCompleted(order, DateTime.Now);
 
+            uw.Dispose();
+        }
+
+
+        [TestMethod]
+        public void CustOrderHistory()
+        {
+
+            string custId = "ANATR";
+
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+
+
+            IEnumerable<OrderHistory> orderHistory = uw.Orders.GetCustOrderHistory(custId);
+
+
+            uw.Dispose();
 
         }
 
+        [TestMethod]
+        public void CustOrderDetails()
+        {
+
+            int orderId = 10248;
+
+            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+
+
+            IEnumerable<CustOrderDetail> orderHistory = uw.Orders.GetCustOrdersDetail(orderId);
+
+
+            uw.Dispose();
+
+        }
     }
 }

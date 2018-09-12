@@ -13,7 +13,9 @@ namespace DAL.Abstracts
         void SetOrderAsUnderway(Order order, DateTime orderDate);
         void SetOrderAsCompleted(Order order, DateTime shippedDate);
 
-        //object GetCustomerOrderHistory(string customerId);
+        IEnumerable<OrderHistory> GetCustOrderHistory(string customerId);
+        IEnumerable<CustOrderDetail> GetCustOrdersDetail(int orderId);
+        
        
 
 
