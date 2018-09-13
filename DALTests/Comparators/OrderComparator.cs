@@ -9,7 +9,7 @@ namespace DALTests.Comparators
 {
     class OrderComparator
     {
-        public int Compare(Order order1, Order order2)
+        public bool Compare(Order order1, Order order2)
         {
             return order1.CustomerID     == order2.CustomerID &&
                    order1.EmployeeID     == order2.EmployeeID &&
@@ -25,7 +25,7 @@ namespace DALTests.Comparators
                    order1.ShippedDate    == order2.ShippedDate &&
                    order1.ShipPostalCode == order2.ShipPostalCode &&
                    order1.ShipRegion     == order2.ShipRegion &&
-                   order1.ShipVia        == order2.ShipVia ? 0 : 1;
+                   order1.ShipVia        == order2.ShipVia;
         }
 
     }

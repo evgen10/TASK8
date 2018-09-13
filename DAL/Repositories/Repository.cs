@@ -164,6 +164,7 @@ namespace DAL.Repositories
             columns.Length--;
             values.Length--;
 
+            string s = $"Insert into {tableName} ({columns}) values({values})";
             return $"Insert into {tableName} ({columns}) values({values})";
 
         }

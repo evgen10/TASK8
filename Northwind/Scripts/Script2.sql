@@ -1,1 +1,1 @@
-﻿DELETE Orders WHERE OrderID = '11088' 
+﻿exec CustOrderHist @CustomerID = 'ALFKI'

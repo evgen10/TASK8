@@ -7,6 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 using DAL;
 using DALTests.Comparators;
+using System.Transactions;
+using System.Data;
+using System.Data.Common;
+
 namespace DALTests
 {
     [TestClass]
@@ -16,8 +20,56 @@ namespace DALTests
         private string providerName = "System.Data.SqlClient";
 
 
+        private Order AddOrderToDB()
+        {
+
+            Order order = new Order
+            {
+                OrderID = 4444444,
+                CustomerID = "KOENE",
+                EmployeeID = 9,
+                OrderDate = null,
+                RequiredDate = null,
+                ShippedDate = null,
+                ShipVia = 2,
+                Freight = (decimal)21.19,
+                ShipName = "Königlich Essen",
+                ShipAddress = "Maubelstr. 90",
+                ShipCity = "Brandenburg",
+                ShipRegion = null,
+                ShipPostalCode = "14776",
+                ShipCountry = "Germany"
+
+            };
+
+            var factory = DbProviderFactories.GetFactory(providerName);
+
+            using (IDbConnection connection = factory.CreateConnection())
+            {
+                connection.ConnectionString = connectionString;
+                connection.Open();
+
+                IDbCommand command = connection.CreateCommand();
+                command.CommandText = @"set identity_insert Orders on 
+                                       INSERT INTO Orders ( OrderID, CustomerID, EmployeeID, OrderDate, RequiredDate,
+                                                            ShippedDate, ShipVia, Freight, ShipName, ShipAddress,
+                                                            ShipCity, ShipRegion, ShipPostalCode, ShipCountry)
+                                        VALUES(4444444, N'KOENE', 9, NULL, NULL, NULL, 2, 21.19,
+                                        N'Königlich Essen', N'Maubelstr. 90', N'Brandenburg', NULL, N'14776', N'Germany')
+                                        set identity_insert Orders off ";
 
 
+                command.CommandType = CommandType.Text;
+                command.ExecuteNonQuery();
+
+                return order;
+            }
+
+
+
+
+
+        }
 
 
         [TestMethod]
@@ -94,9 +146,8 @@ namespace DALTests
         public void CreateOrder()
         {
 
-            //записываемый в бд заказ
             Order order = new Order
-            {               
+            {
                 CustomerID = "CACTU",
                 EmployeeID = 4,
                 OrderDate = DateTime.Now,
@@ -105,18 +156,24 @@ namespace DALTests
 
             };
 
+            int orderCount = 830;
+
+            TransactionScope scope = new TransactionScope();
 
             using (UnitOfWork uw = new UnitOfWork(connectionString, providerName))
             {
-                uw.Orders.Create(order);               
-                             
-                                               
+
+                uw.Orders.Create(order);
+                orderCount++;
+
+                var beforeCreateOrderCount = uw.Orders.GetAll().Count();
+                scope.Dispose();
+
+                Assert.AreEqual(orderCount, beforeCreateOrderCount);
+
             }
 
-            using (UnitOfWork uow = new UnitOfWork(connectionString, providerName))
-            {
-                uow.Orders.GetAll().First(x => x == order);
-            }            
+
 
         }
 
@@ -135,9 +192,23 @@ namespace DALTests
             };
 
 
-            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
-            uw.Products.Create(product);
-            uw.Dispose();
+            int productCount = 77;
+
+            TransactionScope scope = new TransactionScope();
+
+            using (UnitOfWork uw = new UnitOfWork(connectionString, providerName))
+            {
+
+                uw.Products.Create(product);
+                productCount++;
+                var beforeCreateProductCount = uw.Products.GetAll().Count();
+
+                scope.Dispose();
+                Assert.AreEqual(productCount, beforeCreateProductCount);
+
+
+            }
+
 
 
 
@@ -146,122 +217,171 @@ namespace DALTests
         [TestMethod]
         public void DeleteEmployeeTerritories()
         {
-
             EmployeeTerritories empTer = new EmployeeTerritories()
             {
                 EmployeeID = 1,
                 TerritoryID = "06897"
             };
 
+            TransactionScope scope = new TransactionScope();
 
-            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
-            uw.EmployeeTerritories.Delete(empTer);
-            uw.Dispose();
+            using (UnitOfWork uw = new UnitOfWork(connectionString, providerName))
+            {
+                uw.EmployeeTerritories.Delete(empTer);
+
+                EmployeeTerritories deletedEmpTer = uw.EmployeeTerritories.Find(empTer);
+
+                scope.Dispose();
+
+                Assert.IsNull(deletedEmpTer);
+
+
+            }
+
+
         }
 
         [TestMethod]
         public void DeleteOrder()
         {
-            Order order = new Order
+
+            TransactionScope scope = new TransactionScope();
+            Order order = AddOrderToDB();
+
+            using (UnitOfWork uw = new UnitOfWork(connectionString, providerName))
             {
-                OrderID = 12079,
-                CustomerID = "HUNGO",
-                EmployeeID = 3,
-                OrderDate = DateTime.Now,
-                RequiredDate = DateTime.Now,
-                ShippedDate = DateTime.Now,
-                ShipCountry = "RK"
 
-            };
+                uw.Orders.Delete(order);
 
-            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+                Order deletedOrder = uw.Orders.Find(order);
 
-            uw.Orders.Delete(order);
+                scope.Dispose();
 
-            uw.Dispose();
+                Assert.IsNull(deletedOrder);
+
+            }
 
         }
 
         [TestMethod]
         public void GetOrderNomenclature()
         {
-            OrderNomenclature orderNom;
-
-            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
-
-            orderNom = uw.Orders.GetOrderNomenclature(5522200);
-
-            uw.Dispose();
-        }
-
-        [TestMethod]
-        public void FindTest()
-        {
-            Order o = new Order()
+            OrderNomenclature expectedOrderNom = new OrderNomenclature()
             {
-                OrderID = 102411
-            };
-
-            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
-
-            var order = uw.Orders.Find(o);
-
-            uw.Dispose();
-
-        }
-
-
-        [TestMethod]
-        public void UpdateProduct()
-        {
-            Product product = new Product()
-            {
-                ProductID = 1,
-                ProductName = "Phone",
-                SupplierID = 1,
-                CategoryID = 1,
-                QuantityPerUnit = null,
-                UnitPrice = 14,
-                UnitsInStock = 5,
-                UnitsOnOrder = 8,
-                ReorderLevel = null,
-                Discontinued = true
+                CustomerID = "VINET",
+                Discount = 0,
+                EmployeeID = 5,
+                Freight = (decimal)32.3800,
+                OrderDate = DateTime.Parse("7/4/1996 12:00:00 AM"),
+                OrderID = 10248,
+                ProductID = 11,
+                ProductName = "Queso Cabrales",
+                Quantity = 12,
+                RequiredDate = DateTime.Parse("8/1/1996 12:00:00 AM"),
+                ShipAddress = "59 rue de l'Abbaye",
+                ShipCity = "Reims",
+                ShipCountry = "France",
+                ShipName = "Vins et alcools Chevalier",
+                ShipPostalCode = "51100",
+                ShipRegion = null,
+                ShipVia = 3,
+                ShippedDate = DateTime.Parse("7/16/1996 12:00:00 AM"),
+                UnitPrice = (decimal)14.0000,
 
             };
 
-            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
 
-            uw.Products.Update(product);
-            uw.Dispose();
+            OrderNomenclature resultOrderNom;
+
+            using (UnitOfWork uw = new UnitOfWork(connectionString, providerName))
+            {
+                resultOrderNom = uw.Orders.GetOrderNomenclature(10248);
+
+                Assert.IsTrue(new OrderNomenclatureComparator().Comparer(expectedOrderNom, resultOrderNom));
+
+            }
+
+
+
 
         }
+
+        [TestMethod]
+        public void FidnOrderTest()
+        {
+
+            OrderNomenclature expectedOrder = new OrderNomenclature()
+            {
+                CustomerID = "VINET",               
+                EmployeeID = 5,
+                Freight = (decimal)32.3800,
+                OrderDate = DateTime.Parse("7/4/1996 12:00:00 AM"),
+                OrderID = 10248,              
+                RequiredDate = DateTime.Parse("8/1/1996 12:00:00 AM"),
+                ShipAddress = "59 rue de l'Abbaye",
+                ShipCity = "Reims",
+                ShipCountry = "France",
+                ShipName = "Vins et alcools Chevalier",
+                ShipPostalCode = "51100",
+                ShipRegion = null,
+                ShipVia = 3,
+                ShippedDate = DateTime.Parse("7/16/1996 12:00:00 AM"),
+         
+
+            };
+
+
+            using (UnitOfWork uw = new UnitOfWork(connectionString, providerName))
+            {
+                Order resultOrder = uw.Orders.Find(expectedOrder);
+
+                Assert.IsTrue(new OrderComparator().Compare(expectedOrder, resultOrder));
+
+            }
+
+                
+
+            
+
+        }
+
 
         [TestMethod]
         public void UpdateOrder()
-        {
-            Order order = new Order
+        {       
+
+            Order expecteOrder = new Order()
             {
-                OrderID = 11078,
-                CustomerID = "HUNGO",
-                EmployeeID = 6,
-                // OrderDate = DateTime.Now,
-                RequiredDate = DateTime.Now,
-                // ShippedDate = DateTime.Now,
-                Freight = null,
-                ShipName = null,
-                ShipPostalCode = null,
-                ShipCountry = "RKY",
-                ShipRegion = "RJ",
-                ShipVia = 3
-
-
+                OrderID = 4444444,
+                CustomerID = "KOENE",
+                EmployeeID = 9,
+                OrderDate = null,
+                RequiredDate = null,
+                ShippedDate = null,
+                ShipVia = 2,
+                Freight = (decimal)21.19,
+                ShipName = "Change",
+                ShipAddress = "Change",
+                ShipCity = "Change",
+                ShipRegion = null,
+                ShipPostalCode = "Change",
+                ShipCountry = "Change"
             };
 
+            TransactionScope scope = new TransactionScope();
 
-            UnitOfWork uw = new UnitOfWork(connectionString, providerName);
+            Order sourceOrder = AddOrderToDB();
 
-            uw.Orders.Update(order);
-            uw.Dispose();
+            using (UnitOfWork uw = new UnitOfWork(connectionString, providerName))
+            {
+
+                uw.Orders.Update(expecteOrder);
+                Order resultOrder = uw.Orders.Find(expecteOrder);
+                scope.Dispose();
+
+                Assert.IsTrue(new OrderComparator().Compare(expecteOrder, resultOrder));
+            }              
+            
         }
 
         [TestMethod]

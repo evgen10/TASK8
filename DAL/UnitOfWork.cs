@@ -12,9 +12,10 @@ namespace DAL
 {
     public class UnitOfWork: IDisposable, IUnitOfWork
     {
-        private readonly IDbConnection connection;
-        private readonly DbProviderFactory providerFactory;    
+       
+        private readonly DbProviderFactory providerFactory;
 
+        public IDbConnection Connection { get; private set; }
         public IOrderRepository Orders { get; private set; }
         public IProductRepository Products { get; private set; }
         public IEmployeeTerritoriesRepository EmployeeTerritories { get; private set; }
@@ -23,19 +24,19 @@ namespace DAL
         {
             providerFactory = DbProviderFactories.GetFactory(providerName);
 
-            connection = providerFactory.CreateConnection();
-            connection.ConnectionString = connectionString;
-            connection.Open();
+            Connection = providerFactory.CreateConnection();
+            Connection.ConnectionString = connectionString;
+            Connection.Open();
 
 
-            Orders = new OrderRepository(connection);
-            Products = new ProductRepository(connection);
-            EmployeeTerritories = new EmployeeTerritoriesRepository(connection);
+            Orders = new OrderRepository(Connection);
+            Products = new ProductRepository(Connection);
+            EmployeeTerritories = new EmployeeTerritoriesRepository(Connection);
         }
         
         public void Dispose()
         {
-            connection.Close();
+            Connection.Close();
         }
     }
 }

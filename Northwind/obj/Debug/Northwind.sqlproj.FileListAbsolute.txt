@@ -8,7 +8,3 @@ D:\EVgen\Tasks\TASK8\Northwind\bin\Debug\Northwind.dll
 D:\EVgen\Tasks\TASK8\Northwind\bin\Debug\Northwind.pdb
 D:\EVgen\Tasks\TASK8\Northwind\obj\Debug\Northwind.dll
 D:\EVgen\Tasks\TASK8\Northwind\obj\Debug\Northwind.pdb
-D:\EVgen\Tasks\TASK8\Northwind\obj\Debug\Model.xml
-D:\EVgen\Tasks\TASK8\Northwind\obj\Debug\refactor.xml
-D:\EVgen\Tasks\TASK8\Northwind\obj\Debug\postdeploy.sql
-D:\EVgen\Tasks\TASK8\Northwind\obj\Debug\predeploy.sql
