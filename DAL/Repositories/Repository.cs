@@ -16,9 +16,8 @@ using DAL.Exceptions;
 namespace DAL.Repositories
 {
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : BaseEntity, new()
-    {
-        protected readonly DbProviderFactory providerFactory;
-        protected readonly string connectionString;
+    {        
+      
         protected readonly IDbConnection connection;
 
         public Repository(IDbConnection connection)
@@ -26,7 +25,11 @@ namespace DAL.Repositories
             this.connection = connection;
         }
 
-        public virtual void Create(TEntity entity)
+        /// <summary>
+        /// Добавить сущность в базу данных
+        /// </summary>
+        /// <param name="entity"></param>
+        public virtual void Create(TEntity entity)//(Задание 3)
         {
             IDbCommand command = connection.CreateCommand();
             command.CommandText = GetInsertQuery(typeof(TEntity).Name, entity);
@@ -35,6 +38,10 @@ namespace DAL.Repositories
             command.ExecuteNonQuery();
         }
 
+        /// <summary>
+        /// Удалить сущность из базы данных
+        /// </summary>
+        /// <param name="entity"></param>
         public virtual void Delete(TEntity entity)
         {
             IDbCommand command = connection.CreateCommand();
@@ -54,7 +61,11 @@ namespace DAL.Repositories
 
         }
 
-        public virtual IEnumerable<TEntity> GetAll()
+        /// <summary>
+        /// Получить все сущности из базы данных
+        /// </summary>
+        /// <returns></returns>
+        public virtual IEnumerable<TEntity> GetAll()//(Задание 1)
         {
 
             IDbCommand command = connection.CreateCommand();
@@ -66,6 +77,10 @@ namespace DAL.Repositories
 
         }
         
+        /// <summary>
+        /// Изменение сущности в базе данных
+        /// </summary>
+        /// <param name="entity"></param>
         public virtual void Update(TEntity entity)
         {
             IDbCommand command = connection.CreateCommand();
@@ -85,6 +100,11 @@ namespace DAL.Repositories
             }
         }
 
+        /// <summary>
+        /// Поиск сущности в базе данных
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         public virtual TEntity Find(TEntity entity)
         {
             try
@@ -92,7 +112,7 @@ namespace DAL.Repositories
                 IDbCommand command = connection.CreateCommand();
 
                 command.CommandText = GetFindQuery(typeof(TEntity).Name, entity);
-                command.CommandType = CommandType.Text;
+                command.CommandType = CommandType.Text;                
                 return Mapper<TEntity>(command).First();
             }
             catch (InvalidOperationException)
@@ -102,9 +122,16 @@ namespace DAL.Repositories
 
         }
 
+        /// <summary>
+        /// Проецирует записи в таблицы в коллекцию объектов
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="command"></param>
+        /// <returns></returns>
         protected IEnumerable<T> Mapper<T>(IDbCommand command) where T : new()
         {
             List<T> list = new List<T>();
+
             Type type = typeof(T);
             PropertyInfo[] properties = type.GetProperties();
 
@@ -116,8 +143,10 @@ namespace DAL.Repositories
 
                     foreach (var property in properties)
                     {
+                        //не рассматриваем поля помеченные атрибутом NotColumn
                         if (!property.IsDefined(typeof(NotColumnAttribute)))
                         {
+                            //если поле в бд имеет значение DBNull
                             if (reader[property.Name] is DBNull)
                             {
                                 property.SetValue(entity, null);
@@ -136,13 +165,25 @@ namespace DAL.Repositories
             }
         }
 
+        /// <summary>
+        /// Возвращает запрос для выбора всех элементов с таблицы
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <returns></returns>
         private string GetAllOrderQuery(string tableName)
         {
             return $"select * from dbo.{GetPluralize(tableName)}";
         }
 
+        /// <summary>
+        /// Формирует запрос на вставку в базу данных
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         private string GetInsertQuery(string tableName, TEntity entity)
         {
+
             tableName = GetPluralize(tableName);
 
             StringBuilder columns = new StringBuilder();
@@ -163,24 +204,36 @@ namespace DAL.Repositories
             //убираем лишние запятые
             columns.Length--;
             values.Length--;
-
-            string s = $"Insert into {tableName} ({columns}) values({values})";
+           
             return $"Insert into {tableName} ({columns}) values({values})";
 
         }
 
+
+        /// <summary>
+        /// Формирует запрос на удаление из базы данных
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         private string GetDeleteQuery(string tableName, TEntity entity)
         {
 
             tableName = GetPluralize(tableName);
 
-            StringBuilder idColumns = GetCondition(entity);
+            StringBuilder deleteCondition = GetCondition(entity);
 
-            return $"delete from {tableName} where {idColumns}";
+            return $"delete from {tableName} where {deleteCondition}";
 
 
         }
 
+        /// <summary>
+        /// Возвращает запрос для поиска записи
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         private string GetFindQuery(string tableName, TEntity entity)
         {
             StringBuilder condition = GetCondition(entity);
@@ -190,6 +243,13 @@ namespace DAL.Repositories
             return $"select * from {tableName} where {condition}";
         }
 
+        /// <summary>
+        /// Возвращает запрос для обновления данных в таблице
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="sourceEntity"></param>
+        /// <param name="changeableEntity"></param>
+        /// <returns></returns>
         private string GetUpdateQuery(string tableName, TEntity sourceEntity , TEntity changeableEntity)
         {
             StringBuilder settings  = GetUpdateSetting(sourceEntity, changeableEntity);
@@ -201,19 +261,27 @@ namespace DAL.Repositories
             return $"update {tableName} set {settings} where {condition}";
         }
 
+        /// <summary>
+        /// Формирует область SET для обновления данных
+        /// </summary>
+        /// <param name="sourceEntity"></param>
+        /// <param name="changeableEntity"></param>
+        /// <returns></returns>
         private StringBuilder GetUpdateSetting(TEntity sourceEntity, TEntity changeableEntity)
         {
             Type type = sourceEntity.GetType();
 
+            //НЕ рассматриваем ключевые поля и поля которых нет в таблице
             List<PropertyInfo> properties = type.GetProperties().Where(p => !p.IsDefined(typeof(KeyAttribute)) && !p.IsDefined(typeof(NotColumnAttribute))).ToList();
 
             StringBuilder settings = new StringBuilder();          
 
             foreach (var property in properties)
             {
-               
+               //меняем данные если исходные данные не равны изменяемым
                 if (!Equals(property.GetValue(sourceEntity), property.GetValue(changeableEntity)))
                 {
+                    //если изменяемое свойство null
                     if (property.GetValue(changeableEntity) == null)
                     {
                         settings.AppendLine($"{property.Name} = null ");
@@ -234,30 +302,38 @@ namespace DAL.Repositories
 
         }
 
+        /// <summary>
+        /// Возвращает условие опираясь на ключевые поля
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         private StringBuilder GetCondition(TEntity entity)
         {
+            //получаем только ключевые поля
             Type type = entity.GetType();
-            List<PropertyInfo> properties = type.GetProperties().Where(p => p.IsDefined(typeof(KeyAttribute))).ToList();
+            IEnumerable<PropertyInfo> properties = type.GetProperties().Where(p => p.IsDefined(typeof(KeyAttribute)));
 
-            StringBuilder idColumns = new StringBuilder();
+            StringBuilder condition = new StringBuilder();
 
-            if (properties.Count != 0)
+            if (properties.Count() != 0)
             {
-                if (properties.Count > 1)
+                //если ключей больше чем 1 то формируется сложное условие
+                if (properties.Count() > 1)
                 {
                     string andStr = " AND ";
 
                     foreach (var property in properties)
                     {
-                        idColumns.Append($"{property.Name}='{property.GetValue(entity)}'");
-                        idColumns.Append(andStr);
+                        condition.Append($"{property.Name}='{property.GetValue(entity)}'");
+                        condition.Append(andStr);
                     }
 
-                    idColumns.Length -= andStr.Length;
+                    //убираем лишний AND
+                    condition.Length -= andStr.Length;
                 }
                 else
                 {
-                    idColumns.Append($"{properties.First().Name}='{properties.First().GetValue(entity)}'");
+                    condition.Append($"{properties.First().Name}='{properties.First().GetValue(entity)}'");
                 }
 
             }
@@ -266,9 +342,14 @@ namespace DAL.Repositories
                 throw new LackKeyFieldException($"There is no  a key property in entity {type.Name}");
             }
 
-            return idColumns;
+            return condition;
         }
 
+        /// <summary>
+        /// Переводит название сущности в множественное число
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns></returns>
         private string GetPluralize(string word)
         {
             PluralizationService server = PluralizationService.CreateService(CultureInfo.CurrentCulture);
@@ -277,14 +358,20 @@ namespace DAL.Repositories
             return word;
         }
 
-        private List<PropertyInfo> GetDateForInsertUpdate(TEntity entity)
+        /// <summary>
+        /// Получаем свойства поля для вставки в базу данных
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        private IEnumerable<PropertyInfo> GetDateForInsertUpdate(TEntity entity)
         {
 
             Type type = entity.GetType();
 
-            List<PropertyInfo> properties = type.GetProperties().Where(p => !p.IsDefined(typeof(NotColumnAttribute)) &&
+            //поля не должны быть помечены как Key, NotColumn и не быть null
+            IEnumerable<PropertyInfo> properties = type.GetProperties().Where(p => !p.IsDefined(typeof(NotColumnAttribute)) &&
                                                              !p.IsDefined(typeof(KeyAttribute)) &&
-                                                              p.GetValue(entity) != null).ToList();
+                                                              p.GetValue(entity) != null);
 
             return properties;
 

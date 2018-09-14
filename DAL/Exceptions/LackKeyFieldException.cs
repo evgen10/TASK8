@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace DAL.Exceptions
 {
+    /// <summary>
+    /// Возникает если отсутствует ключевое поле
+    /// </summary>
     public class LackKeyFieldException : Exception
     {
         public LackKeyFieldException(string message) : base(message)

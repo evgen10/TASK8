@@ -14,8 +14,8 @@ namespace DAL
     {
        
         private readonly DbProviderFactory providerFactory;
+        private readonly IDbConnection connection;
 
-        public IDbConnection Connection { get; private set; }
         public IOrderRepository Orders { get; private set; }
         public IProductRepository Products { get; private set; }
         public IEmployeeTerritoriesRepository EmployeeTerritories { get; private set; }
@@ -24,19 +24,19 @@ namespace DAL
         {
             providerFactory = DbProviderFactories.GetFactory(providerName);
 
-            Connection = providerFactory.CreateConnection();
-            Connection.ConnectionString = connectionString;
-            Connection.Open();
+            connection = providerFactory.CreateConnection();
+            connection.ConnectionString = connectionString;
+            connection.Open();
 
 
-            Orders = new OrderRepository(Connection);
-            Products = new ProductRepository(Connection);
-            EmployeeTerritories = new EmployeeTerritoriesRepository(Connection);
+            Orders = new OrderRepository(connection);
+            Products = new ProductRepository(connection);
+            EmployeeTerritories = new EmployeeTerritoriesRepository(connection);
         }
         
         public void Dispose()
         {
-            Connection.Close();
+            connection.Close();
         }
     }
 }

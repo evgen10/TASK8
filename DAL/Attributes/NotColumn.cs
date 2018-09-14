@@ -7,6 +7,9 @@ using System.Reflection;
 
 namespace DAL.Attributes
 {
+    /// <summary>
+    /// Атрибут указывает, что свойство не имеет аналогов в таблице
+    /// </summary>
     [AttributeUsage(AttributeTargets.Property, Inherited = true) ]
     class NotColumnAttribute: Attribute
     {

@@ -21,8 +21,10 @@ namespace DAL.Repositories
 
         }
 
-        public override void Delete(Order order)
+
+        public override void Delete(Order order)//(Задание 5)
         {
+            //запрет на удаление заказов со статусом Completed
             if (order.OrderStatus != OrderStatuses.Completed)
             {
                 base.Delete(order);
@@ -33,23 +35,28 @@ namespace DAL.Repositories
             }
         }
 
-        public override void Update(Order order)
+        public override void Update(Order order)//(Задание 4)
         {
+            //проверяем есть ли данный заказ в базе
             Order sourceOrder = Find(order);
 
-
-            if (sourceOrder.OrderStatus == OrderStatuses.Underway || sourceOrder.OrderStatus == OrderStatuses.Completed)
+            // запрет на изменения данных в заказах со статусами Underway и Completed
+            if (sourceOrder.OrderStatus == OrderStatuses.Underway || sourceOrder.OrderStatus == OrderStatuses.Completed)//(Задание 4 с)
             {
                 throw new ProhibitionUpdateException("Order status prohibits changes");
             }
 
 
 
+            //получаем свойства помеченные атрибутом Unchangeable Attribute
             Type type = order.GetType();
             IEnumerable<PropertyInfo> unchangeableProperties = type.GetProperties().Where(p => p.IsDefined(typeof(UnchangeableAttribute)));
 
-            if (sourceOrder != null)
+
+            
+            if (sourceOrder != null)//(Задание 4 а, b)
             {
+                //проверяем меняются ли эти свойства 
                 foreach (var property in unchangeableProperties)
                 {
                     if (!Equals(property.GetValue(sourceOrder), property.GetValue(order)))
@@ -58,6 +65,7 @@ namespace DAL.Repositories
                     }
                 }
 
+                //если нет то изменяем сущность
                 base.Update(order);
 
             }
@@ -71,13 +79,20 @@ namespace DAL.Repositories
 
         }
 
-        public void SetOrderAsUnderway(Order order, DateTime orderDate)
+
+        /// <summary>
+        /// Присваивает заказу статус "Underway"
+        /// </summary>
+        /// <param name="order"></param>
+        /// <param name="orderDate"></param>
+        public void SetOrderAsUnderway(Order order, DateTime orderDate)//(Задание 6 а)
         {
             Order sourceOrder = Find(order);
 
             if (sourceOrder != null)
             {
                 sourceOrder.OrderDate = orderDate;
+                //вызывается базовый метод т.к в предопределенном запрещается менять данное свойство
                 base.Update(sourceOrder);
             }
             else
@@ -87,7 +102,12 @@ namespace DAL.Repositories
 
         }
 
-        public void SetOrderAsCompleted(Order order, DateTime shippedDate)
+        /// <summary>
+        ///  Присваивает заказу статус "Completed"
+        /// </summary>
+        /// <param name="order"></param>
+        /// <param name="shippedDate"></param>
+        public void SetOrderAsCompleted(Order order, DateTime shippedDate)//(Задание 6 b)
         {
             Order sourceOrder = Find(order);
 
@@ -102,13 +122,19 @@ namespace DAL.Repositories
             }
         }
 
-        public IEnumerable<OrderHistory> GetCustOrderHistory(string customerId)
+        /// <summary>
+        /// Вызвает хранимую процедуру "CustOrderHist" 
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        public IEnumerable<OrderHistory> GetCustOrderHistory(string customerId)//(Задание 7 а)
         {
             IDbCommand command = connection.CreateCommand();
 
             command.CommandText = "CustOrderHist";
             command.CommandType = CommandType.StoredProcedure;
 
+            //создаем параметр
             IDbDataParameter custIdPrarm = command.CreateParameter();
             custIdPrarm.ParameterName = "@CustomerID";
             custIdPrarm.DbType = DbType.StringFixedLength;
@@ -121,7 +147,12 @@ namespace DAL.Repositories
 
         }
 
-        public IEnumerable<CustOrderDetail> GetCustOrdersDetail(int orderId)
+        /// <summary>
+        /// Вызвает хранимую процедуру "CustOrdersDetail" 
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        public IEnumerable<CustOrderDetail> GetCustOrdersDetail(int orderId)//(Задание 7 b)
         {
             IDbCommand command = connection.CreateCommand();
 
@@ -138,8 +169,13 @@ namespace DAL.Repositories
             return Mapper<CustOrderDetail>(command);
         }
 
-        public OrderNomenclature GetOrderNomenclature(int orderId)
-        {
+        /// <summary>
+        /// Показывать подробные сведения о конкретном заказе 
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        public OrderNomenclature GetOrderNomenclature(int orderId)// (Задание 2)
+        {           
             try
             {
 
@@ -156,7 +192,13 @@ namespace DAL.Repositories
             }
 
         }
-        
+
+
+        /// <summary>
+        /// Возвращает запрос  для подробных сведений о конкретном заказе 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         private string GetOrderNomenclaturQuery(int id)
         {
             return @"select o.*,od.ProductID,p.ProductName, od.UnitPrice,od.Quantity,od.Discount

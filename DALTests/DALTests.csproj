@@ -54,10 +54,12 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Comparators\CustOrderDetailsComparator.cs" />
     <Compile Include="Comparators\OrderComparator.cs" />
+    <Compile Include="Comparators\OrderHistoryComparer.cs" />
     <Compile Include="Comparators\OrderNomenclatureComparator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="DALTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DAL\DAL.csproj">

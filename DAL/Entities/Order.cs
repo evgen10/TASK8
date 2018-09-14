@@ -19,14 +19,14 @@ namespace DAL.Entities
         }
 
         [NotColumn]
-        public OrderStatuses OrderStatus { get; set; }
+        public OrderStatuses OrderStatus { get; private set; }
 
         [Key]
         public int OrderID { get; set; }
 
         public string CustomerID { get; set; }
 
-        public int? EmployeeID { get; set; }       
+        public int? EmployeeID { get; set; }
 
         [Unchangeable]
         public DateTime? OrderDate
@@ -39,7 +39,7 @@ namespace DAL.Entities
             }
         }
 
-        public DateTime? RequiredDate { get; set; }   
+        public DateTime? RequiredDate { get; set; }
 
         [Unchangeable]
         public DateTime? ShippedDate
@@ -67,22 +67,32 @@ namespace DAL.Entities
         public string ShipPostalCode { get; set; }
 
         public string ShipCountry { get; set; }
-                
+
+        /// <summary>
+        /// Устанавливает статус заказа
+        /// </summary>
+        /// <returns></returns>
         protected OrderStatuses SetStatus()
         {
-            if (this.OrderDate == null)
+            OrderStatuses status = OrderStatuses.New;
+
+            if (this.OrderDate == null && this.ShippedDate == null)
             {
-                return OrderStatuses.New;
+                status = OrderStatuses.New;
             }
 
-            if (this.ShippedDate == null)
+            if (this.OrderDate != null && this.ShippedDate == null)
             {
-                return OrderStatuses.Underway;
+                status = OrderStatuses.Underway;
             }
-            else
+
+            if (this.ShippedDate != null)
             {
-                return OrderStatuses.Completed;
+                status = OrderStatuses.Completed;
             }
+
+
+            return status;
         }
 
     }
